@@ -1,0 +1,230 @@
+{% load static %}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+        }
+        
+        .l-form {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .shape1,
+        .shape2 {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background-color: #3498db;
+            transition: all 0.3s ease;
+        }
+        
+        .shape1 {
+            top: -100px;
+            left: 0;
+        }
+        
+        .shape2 {
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .form {
+            position: relative;
+            max-width: 400px;
+            margin: auto;
+            margin-top: 50px;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form__content {
+            text-align: center;
+        }
+        
+        .form__title {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .form__div-input {
+            position: relative;
+            margin-bottom: 20px; /* Add some margin to create space */
+        }
+        
+        .form__input {
+            font-size: 18px;
+            width: 100%;
+            padding: 10px 0;
+            margin: 5px 0;
+            border: none;
+            border-bottom: 2px solid #adadad;
+            background: transparent;
+            outline: none;
+        }
+        
+        .form__label {
+            font-size: 20px;
+            color: #333;
+            transition: all 0.3s ease;
+            position: absolute;
+            left: 0;
+            top: 10px; /* Initially set to 10px */
+            pointer-events: none; /* Prevent label from receiving pointer events */
+        }
+        
+        .form__input:focus + .form__label,
+        .form__input:not(:placeholder-shown) + .form__label {
+            transform: translateY(-30px); /* Move label up */
+            font-size: 14px;
+            color: #3498db;
+        }
+        
+        .btn {
+            width: 100%;
+            background: #3498db;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 18px;
+            color: white;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        #error-message {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="l-form">
+        <!-- Shapes -->
+        <div class="shape1"></div>
+        <div class="shape2"></div>
+
+        <div class="form">
+            <!-- Image -->
+            <div style="text-align: center;"> <!-- Inline CSS applied here -->
+                <img src="{%static 'SKMLOGO1.png'  %}">
+            </div>
+            <!-- Form Content -->
+            <div class="form__content">
+                <h1 class="form__title">Welcome</h1>
+                <!-- Username Input -->
+                <div class="form__div-input">
+                    <input type="text" id="username" class="form__input" required>
+                    <label for="username" class="form__label">Username</label>
+                </div>
+                <!-- Password Input -->
+                <div class="form__div-input">
+                    <input type="password" id="password" class="form__input" required>
+                    <label for="password" class="form__label">Password</label>
+                </div>
+                <!-- Login Button -->
+                <button class="btn" onclick="login()">Login</button>
+                <button class="btn" onclick="home()">Home</button>
+                <!-- Error Message -->
+                <p id="error-message" style="color: red;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        function login() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+    
+            // Define the allowed users
+            var allowedUsers = [
+                { username: "akash", password: "yadav" },
+                { username: "vikram", password: "parte" },
+                { username: "prince", password: "philips" }
+            ];
+    
+            // Check if the entered credentials match any of the allowed users
+            var isValidUser = allowedUsers.some(function (user) {
+                return user.username === username && user.password === password;
+            });
+    
+            // Display appropriate message
+            var errorMessageElement = document.getElementById("error-message");
+            if (isValidUser) {
+                errorMessageElement.textContent = "Login successful!";
+                // Generate and store a session token
+                var token = generateToken();
+                localStorage.setItem("sessionToken", token);
+                // Redirect to the next page after successful login
+                window.location.href = "/login/TPR";
+            } else {
+                errorMessageElement.textContent = "Invalid username or password";
+            }
+        }
+        function home(){
+            window.location.href = "/";
+
+        }
+        // Check if the user is already logged in when the page loads
+        {% comment %} window.onload = function() {
+            var sessionToken = localStorage.getItem("sessionToken");
+            if (sessionToken) {
+                // Redirect to the next page if already logged in
+                window.location.href = "TPR";
+            }
+        }; {% endcomment %}
+    
+        // Function to generate a random session token
+        function generateToken() {
+            // Generate a random alphanumeric string
+            return Math.random().toString(36).substr(2);
+        }
+
+
+
+
+        window.addEventListener('popstate', function(event) {
+            // Check if the user is navigating back
+            if (event.state && event.state.refresh) {
+                // Reload the page
+                location.reload();
+            }
+        });
+        
+        // Function to add refresh state to history when navigating away
+        function addRefreshState() {
+            history.pushState({refresh: true}, document.title);
+        }
+        
+        // Example usage - You can call this function when the user clicks a link
+        document.getElementById('/login').addEventListener('click', function() {
+            addRefreshState();
+            // Additional logic to navigate to the desired page
+        });
+
+    
+
+    </script>
+    
+ </body>
+</html>
