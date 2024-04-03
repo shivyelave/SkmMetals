@@ -216,7 +216,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for data in form_data %}
+                {% for data in form_data reversed %}
                 <tr>
                     <td>{{ data.TPR_NO }}</td>
                     <td>{{ data.segment }}</td>
