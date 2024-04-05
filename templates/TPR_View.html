@@ -197,8 +197,7 @@
     <div class="logo cont1">
         <img src="{%static 'SKMLOGO1.png'  %}">
 
-        <button id="logoutButton" onclick="logout(); location.reload(true);
-        ">Logout</button>
+
 
     </div>
     <div class="container">
@@ -218,7 +217,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for data in form_data %}
+                {% for data in form_data reversed %}
                 <tr>
                     <td>{{ data.TPR_NO }}</td>
                     <td>{{ data.segment }}</td>
@@ -234,15 +233,7 @@
     </div>
 
     <script>
-        window.onload = function() {
-            var sessionToken = localStorage.getItem("sessionToken");
-            if (!sessionToken) {
-                // Redirect to the login page if not logged in
-                window.location.href = "/emp_login";
-                // Clear browser history
-                history.replaceState(null, null, '/emp_login'); 
-              }
-        };
+
         function logout() {
             // Clear session token from localStorage
             localStorage.removeItem("sessionToken");
