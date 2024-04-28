@@ -13,6 +13,9 @@ urlpatterns = [
     path('login/TPR/', views.TPR, name='TPR'),
     path('login/TPR/tpr', views.admin_view, name='admin_view'),
     path('login/TPR/tpr/delete/', views.delete_tpr, name='delete_tpr'),
+    path('login/TPR/tpr/deleted/', views.display_deleted_entries, name='deleted_tpr'),
+    path('add_deleted_to_tpr/', views.add_deleted_to_tpr, name='add_deleted_to_tpr'),
+
     path('CTL/', views.CTL, name='CTL'),
     path('CRCA/', views.CRCA, name='CRCA'),
     path('shearing/', views.shearing, name='shearing'),

@@ -7,7 +7,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Page</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
             
@@ -187,15 +188,16 @@
         #logoutButton:hover {
             background-color: #df3a2e; /* Darker red background color on hover */
           }
+
     </style>
 </head>
 
 <body>
     <!-- Add image at the top-left corner outside the container -->
-
-    <div  class="cont1">
+    <div class="logo cont1">
         <img src="{%static 'SKMLOGO1.png'  %}">
-        <button id="logoutButton" onclick="logout()">Logout</button>
+
+
 
     </div>
     <div class="container">
@@ -203,88 +205,52 @@
             <input type="text" id="searchInput" placeholder="Search...">
             <button onclick="searchFunction()" class="srch-btn">Search</button>
             <button class="tpr-add-btn" onclick="TPRpage()">ADD TPR</button>
-            <button class="tpr-add-btn" onclick="deleted_page()">View Deleted</button>
+            <!-- Remove the 'Add TPR' button for employee view -->
         </div>
-
-        <table class="table-container">
-            <thead>
+        <form action="{% url 'add_deleted_to_tpr' %}" method="POST">
+            {% csrf_token %}
+            <table>
+              <thead>
                 <tr>
-                    <th onclick="sortTable(1)">TPR Number</th>
-                    <th onclick="sortTable(2)">Segment</th>
-                    <th onclick="sortTable(3)">Customer</th>
-                    <th>PDF View</th>
-                    <th>Delete</th>
+                  <th>Select</th>
+                  <th>TPR No</th>
+                  <th>Segment</th>
+                  <th>Customer</th>
+                  <th>PDF View</th>
                 </tr>
-            </thead>
-            <tbody>
-                {% for data in form_data reversed %}
+              </thead>
+              <tbody>
+                {% for item in deleted_entries %}
                 <tr>
-                    <td>{{ data.TPR_NO }}</td>
-                    <td>{{ data.segment }}</td>
-                    <td>{{ data.customer }}</td>
-                    <td>
-                        <!-- PDF View Option -->
-                         <a href="{{ data.pdf_file.url }}" target="_blank"  class="pdf-view">View_pdf</a>
-                       
-                    </td>
-                    <td >
-                        
-                        <form action="{% url 'delete_tpr' %}" method="POST"  onsubmit="return confirmDelete()">
-                            {% csrf_token %}
-                            <input type="hidden" name="id" value="{{ data.id }}">
-
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                
-                    </td>
-                                    
+                  <td><input type="checkbox" name="selected_deleted[]" value="{{ item.id }}" ></td>
+                  <td>{{ item.TPR_NO }}</td>
+                  <td>{{ item.segment }}</td>
+                  <td>{{ item.customer }}</td>
+                  <td>
+                    <!-- PDF View Option -->
+                    <a href="{{ data.pdf_file.url }}" target="_blank" class="pdf-view">View PDF</a>
+                </td>
                 </tr>
                 {% endfor %}
-                
-            </tbody>
-        </table>
+              </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary m-4">Add Selected Entries to TPR</button>
+          </form>
+          
     </div>
 
     <script>
-    
-        function confirmDelete() {
-            return confirm("Are you sure you want to delete this record?");
+        function confirmAdd() {
+            return confirm("Are you sure you want to add these entries back to TPR?");
         }
-        
-        function refreshPage() {
-            window.location.reload();
-        }
-
-        window.onload = function() {
-            var sessionToken = localStorage.getItem("sessionToken");
-            if (!sessionToken) {
-                // Redirect to the login page if not logged in
-                window.location.href = "/login";
-                // Clear browser history
-                history.replaceState(null, null, '/login'); 
-            }
-        };
-
-        // Function to handle logout
         function logout() {
             // Clear session token from localStorage
             localStorage.removeItem("sessionToken");
             // Redirect to the login page
-            window.location.href = " ";
+            window.location.href = "/emp_login";
             // Add logout entry to browser history
             history.replaceState(null, null, ''); 
         }
-        function TPRpage() {
-            window.location.href = "/login/TPR";
-        }
-        function deleted_page() {
-            window.location.href = "/login/TPR/tpr/deleted";
-        }
-
-        
-            // Function to navigate to Page 2
-    
-
         function searchFunction() {
             const searchInput = document.getElementById("searchInput").value.toLowerCase();
             const rows = document.querySelectorAll("table tbody tr");
@@ -310,38 +276,6 @@
             });
         }
 
-        function viewPDF(pdfLink) {
-            // Add logic to view PDF, you can open a new tab or a modal
-            alert("View PDF: " + pdfLink);
-        }
-
-        // Add a function to delete a specific row
-        function deleteRow(element) {
-            const row = element.closest('tr');
-            row.remove();
-        }
-
-        // Sort table function
-        function sortTable(column) {
-            const table = document.querySelector('table');
-            const rows = Array.from(table.rows).slice(1); // Exclude the header row
-            const isAscending = table.rows[0].cells[column].classList.toggle('asc');
-
-            rows.sort((a, b) => {
-                const aValue = a.cells[column].textContent.trim();
-                const bValue = b.cells[column].textContent.trim();
-
-                return isAscending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-            });
-
-            rows.forEach(row => table.tBodies[0].appendChild(row));
-        }
-
-
-
-
-
-
 
         window.addEventListener('popstate', function(event) {
             // Check if the user is navigating back
@@ -349,18 +283,21 @@
                 // Reload the page
                 location.reload();
             }
-        });
-        
-        // Function to add refresh state to history when navigating away
-        function addRefreshState() {
+          });
+          
+          // Function to add refresh state to history when navigating away
+          function addRefreshState() {
             history.pushState({refresh: true}, document.title);
+          }
+          function TPRpage() {
+            window.location.href = "/login/TPR";
         }
-        
-        // Example usage - You can call this function when the user clicks a link
-        document.getElementById('/login/TPR/tpr').addEventListener('click', function() {
+          
+          // Example usage - You can call this function when the user clicks a link
+          document.getElementById('/login/TPR').addEventListener('click', function() {
             addRefreshState();
             // Additional logic to navigate to the desired page
-        });
+          });
     </script>
 
 </body>
