@@ -5,6 +5,8 @@ from tpr.models import Tpr
 from django.shortcuts import get_object_or_404
 from urllib.parse import quote_plus
 from django.views.decorators.http import require_POST
+from django.http import HttpResponseBadRequest
+
 
 
 
@@ -45,17 +47,33 @@ def TPR(request):
 
 
 def display_form_data(request):
-    form_data = Tpr.objects.all()
-    for a in form_data:
-       print(form_data)
+    form_data = Tpr.objects.filter(is_deleted=False)  # Filtering out only non-deleted data
+    
     return render(request, 'TPR_View.html', {'form_data': form_data})
 
 
+def display_deleted_entries(request):
+    deleted_entries = Tpr.objects.filter(is_deleted=True)
+    return render(request, 'deleted_entries.html', {'deleted_entries': deleted_entries})
 
 
 def admin_view(request):
-    form_data = Tpr.objects.all()
+    form_data = Tpr.objects.filter(is_deleted=False)
     return render(request, 'admin_tpr_view.html', {'form_data': form_data})
+
+@require_POST
+def add_deleted_to_tpr(request):
+    deleted_entry_ids = request.POST.getlist('selected_deleted[]')
+
+    for entry_id in deleted_entry_ids:
+        try:
+            entry = Tpr.objects.get(pk=entry_id)
+            entry.is_deleted = False  # Mark as not deleted
+            entry.save()
+        except Tpr.DoesNotExist:
+            return HttpResponseBadRequest("Tpr object does not exist.")
+
+    return redirect('admin_view')
 
 @require_POST
 def delete_tpr(request):
@@ -64,9 +82,10 @@ def delete_tpr(request):
     if tpr_id:
         try:
             tpr_object = Tpr.objects.get(pk=tpr_id)
-            tpr_object.delete()
+            tpr_object.is_deleted = True  # Marking as deleted
+            tpr_object.save()
         except Tpr.DoesNotExist:
-            pass 
+            return HttpResponseBadRequest("Tpr object does not exist.")
     
     return redirect('admin_view')
 
